@@ -70,8 +70,8 @@ def process_influencer(name, webhook_url):
 
     if atual_leads != enviado["sumLead"] or atual_matriculas != enviado["sumWins"]:
         mensagem = f"""📊 **Atualização para {name}:**
-👥 Leads: {atual_leads} {'(🔼 +' + str(diff_leads) + ')' if diff_leads > 0 else ''}
-🎓 Matrículas: {atual_matriculas} {'(🔼 +' + str(diff_matriculas) + ')' if diff_matriculas > 0 else ''}
+👥 Leads: {atual_leads} {'( +' + str(diff_leads) + ')' if diff_leads > 0 else ''}
+🎓 Matrículas: {atual_matriculas} {'( +' + str(diff_matriculas) + ')' if diff_matriculas > 0 else ''}
 """
         print(f"[INFO] Notificando {name}")
         send_to_discord(webhook_url, mensagem)
