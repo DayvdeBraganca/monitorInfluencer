@@ -5,7 +5,7 @@ from datetime import datetime
 
 API_URL = "https://api.libanoeducacional.com.br/fl-crm/influencesExport"
 CHECK_INTERVAL = 600  # segundos (10 minutos)
-RELATORIO_WEBHOOK_URL = "https://discord.com/api/webhooks/SEU_WEBHOOK_AQUI"  # webhook do canal geral
+RELATORIO_WEBHOOK_URL = "https://discord.com/api/webhooks/1382384824534433883/5-w5d5b0S4Q6enlcCyG6H4RyvvhmaKi6RjOdTI6jpd5XvAGkUsQp_eoZFU0qZrHXssGm"  # webhook do canal geral
 
 with open("webhooks.json", "r") as f:
     WEBHOOKS = json.load(f)
