@@ -1,0 +1,124 @@
+{
+    "influencers": {
+        "rafabelli": {
+            "sumLead": 155,
+            "sumWins": 14
+        },
+        "jessicamotta": {
+            "sumLead": 149,
+            "sumWins": 18
+        },
+        "clara": {
+            "sumLead": 225,
+            "sumWins": 19
+        },
+        "giovanna": {
+            "sumLead": 95,
+            "sumWins": 9
+        },
+        "prof-fergarcia": {
+            "sumLead": 49,
+            "sumWins": 5
+        },
+        "juliana-arruda": {
+            "sumLead": 53,
+            "sumWins": 5
+        },
+        "professorarebeca": {
+            "sumLead": 53,
+            "sumWins": 3
+        },
+        "lorena-ruiz": {
+            "sumLead": 42,
+            "sumWins": 5
+        },
+        "rilton": {
+            "sumLead": 40,
+            "sumWins": 1
+        },
+        "elisa-guimaraes": {
+            "sumLead": 39,
+            "sumWins": 0
+        },
+        "caroline": {
+            "sumLead": 35,
+            "sumWins": 0
+        },
+        "geovani-vieira": {
+            "sumLead": 36,
+            "sumWins": 0
+        },
+        "stephanie-moreira": {
+            "sumLead": 24,
+            "sumWins": 1
+        },
+        "rodrigo-rodrigues": {
+            "sumLead": 23,
+            "sumWins": 0
+        },
+        "thaisnara": {
+            "sumLead": 25,
+            "sumWins": 3
+        },
+        "diessica": {
+            "sumLead": 22,
+            "sumWins": 1
+        },
+        "leticia": {
+            "sumLead": 25,
+            "sumWins": 1
+        },
+        "keilla": {
+            "sumLead": 12,
+            "sumWins": 1
+        },
+        "roberta-isquierdo": {
+            "sumLead": 13,
+            "sumWins": 0
+        },
+        "diogoricardo": {
+            "sumLead": 12,
+            "sumWins": 1
+        },
+        "jessica-barreto": {
+            "sumLead": 9,
+            "sumWins": 0
+        },
+        "jabez": {
+            "sumLead": 9,
+            "sumWins": 0
+        },
+        "prof-carli": {
+            "sumLead": 11,
+            "sumWins": 3
+        },
+        "beatriz": {
+            "sumLead": 5,
+            "sumWins": 0
+        },
+        "flavia-rindeiko": {
+            "sumLead": 0,
+            "sumWins": 0
+        },
+        "gean": {
+            "sumLead": 4,
+            "sumWins": 0
+        },
+        "alexsandro": {
+            "sumLead": 3,
+            "sumWins": 0
+        },
+        "malu": {
+            "sumLead": 0,
+            "sumWins": 0
+        },
+        "leticia-santos": {
+            "sumLead": 0,
+            "sumWins": 0
+        }
+    },
+    "relatorio_geral": {
+        "sumLead": 0,
+        "sumWins": 0
+    }
+}
