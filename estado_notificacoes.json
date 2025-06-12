@@ -1,15 +1,15 @@
 {
     "influencers": {
         "rafabelli": {
-            "sumLead": 155,
+            "sumLead": 156,
             "sumWins": 14
         },
         "jessicamotta": {
-            "sumLead": 149,
+            "sumLead": 150,
             "sumWins": 18
         },
         "clara": {
-            "sumLead": 225,
+            "sumLead": 226,
             "sumWins": 19
         },
         "giovanna": {
@@ -97,7 +97,7 @@
             "sumWins": 0
         },
         "flavia-rindeiko": {
-            "sumLead": 0,
+            "sumLead": 6,
             "sumWins": 0
         },
         "gean": {
@@ -109,16 +109,20 @@
             "sumWins": 0
         },
         "malu": {
-            "sumLead": 0,
+            "sumLead": 1,
             "sumWins": 0
         },
         "leticia-santos": {
-            "sumLead": 0,
+            "sumLead": 2,
             "sumWins": 0
+        },
+        "juliacosta": {
+            "sumLead": 293,
+            "sumWins": 21
         }
     },
     "relatorio_geral": {
-        "sumLead": 0,
-        "sumWins": 0
+        "sumLead": 1473,
+        "sumWins": 111
     }
 }
