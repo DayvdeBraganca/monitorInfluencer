@@ -2,8 +2,9 @@ import requests
 import time
 import json
 from datetime import datetime
-import os # Importado para verificar se o arquivo de estado existe
+import os
 
+# --- CONFIGURAÇÕES ---
 API_URL = "https://api.libanoeducacional.com.br/fl-crm/influencesExport"
 CHECK_INTERVAL = 600  # segundos (10 minutos)
 RELATORIO_WEBHOOK_URL = "https://discord.com/api/webhooks/1382384824534433883/5-w5d5b0S4Q6enlcCyG6H4RyvvhmaKi6RjOdTI6jpd5XvAGkUsQp_eoZFU0qZrHXssGm"
@@ -11,15 +12,23 @@ RELATORIO_WEBHOOK_URL = "https://discord.com/api/webhooks/1382384824534433883/5-
 # Arquivo para persistir o estado entre reinicializações
 ARQUIVO_ESTADO = "estado_notificacoes.json"
 
-with open("webhooks.json", "r") as f:
-    WEBHOOKS = json.load(f)
+# Carrega os webhooks dos influencers do arquivo JSON
+try:
+    with open("webhooks.json", "r") as f:
+        WEBHOOKS = json.load(f)
+except FileNotFoundError:
+    print("[ERRO FATAL] O arquivo 'webhooks.json' não foi encontrado. Crie o arquivo e tente novamente.")
+    exit() # Encerra o script se o arquivo essencial não existir
 
+# --- FUNÇÕES DE ESTADO ---
 def carregar_estado():
     """Carrega o último estado notificado a partir de um arquivo JSON."""
     if os.path.exists(ARQUIVO_ESTADO):
         with open(ARQUIVO_ESTADO, "r") as f:
+            print("[INFO] Arquivo de estado encontrado. Carregando dados...")
             return json.load(f)
     else:
+        print("[INFO] Arquivo de estado não encontrado. Criando um novo estado inicial.")
         # Se o arquivo não existe, cria um estado inicial zerado
         # Inclui uma estrutura para o relatório geral também
         estado_inicial = {
@@ -33,31 +42,39 @@ def salvar_estado(estado):
     with open(ARQUIVO_ESTADO, "w") as f:
         json.dump(estado, f, indent=4)
 
+# --- FUNÇÕES DE API E DISCORD ---
 def get_summary(influencer):
+    """Busca os dados de um influencer específico na API."""
     year = datetime.now().year
     month = datetime.now().month
     url = f"{API_URL}/{year}/{month}/true/{influencer}"
     try:
-        response = requests.get(url, timeout=15) # Adicionado timeout
+        response = requests.get(url, timeout=15)
         response.raise_for_status()
         data = response.json()
         if isinstance(data, dict) and "data" in data and isinstance(data["data"], list):
             return data["data"][0] if data["data"] else {}
         else:
-            print(f"[ERRO] Resposta inesperada para {influencer}: {data}")
+            print(f"[AVISO] Resposta inesperada para {influencer}: {data}")
             return {}
     except requests.exceptions.RequestException as e:
         print(f"[ERRO] Falha ao buscar dados de {influencer}: {e}")
         return {}
 
 def send_to_discord(webhook_url, content):
+    """Envia uma mensagem para um webhook do Discord."""
+    if not webhook_url:
+        print("[AVISO] Webhook URL está vazia. Não é possível enviar a mensagem.")
+        return
     try:
-        response = requests.post(webhook_url, json={"content": content}, timeout=15) # Adicionado timeout
+        response = requests.post(webhook_url, json={"content": content}, timeout=15)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"[ERRO] Falha ao enviar para Discord: {e}")
 
+# --- FUNÇÕES DE PROCESSAMENTO ---
 def process_influencer(name, webhook_url, estado):
+    """Processa os dados de um influencer, compara com o estado salvo e notifica se houver mudança."""
     resumo_atual = get_summary(name)
     if not resumo_atual:
         return
@@ -78,7 +95,7 @@ def process_influencer(name, webhook_url, estado):
         mensagem += f"👥 Leads: {leads_atuais} {'(+' + str(diff_leads) + ')' if diff_leads > 0 else ''}\n"
         mensagem += f"🎓 Matrículas: {wins_atuais} {'(+' + str(diff_wins) + ')' if diff_wins > 0 else ''}"
 
-        print(f"[INFO] Notificando {name}...")
+        print(f"[INFO] Notificando mudança para {name}...")
         send_to_discord(webhook_url, mensagem)
 
         # ATUALIZA o estado do influencer e SALVA no arquivo
@@ -86,6 +103,7 @@ def process_influencer(name, webhook_url, estado):
         salvar_estado(estado)
 
 def enviar_relatorio_geral(estado):
+    """Envia o relatório geral consolidado, se houver mudanças desde o último envio."""
     # Calcula os totais com base nos dados mais recentes salvos no estado
     total_leads_atuais = sum(data["sumLead"] for data in estado["influencers"].values())
     total_wins_atuais = sum(data["sumWins"] for data in estado["influencers"].values())
@@ -100,50 +118,65 @@ def enviar_relatorio_geral(estado):
 🎓 Total de Matrículas: {total_wins_atuais}
 ⏰ Horário: {datetime.now().strftime('%H:%M')}
 """
-        print("[INFO] Enviando relatório geral...")
+        print("[INFO] Enviando relatório geral com novos dados...")
         send_to_discord(RELATORIO_WEBHOOK_URL, mensagem)
 
         # ATUALIZA o estado do relatório geral e SALVA no arquivo
         estado["relatorio_geral"] = {"sumLead": total_leads_atuais, "sumWins": total_wins_atuais}
         salvar_estado(estado)
     else:
-        print("[INFO] Nenhuma alteração para o relatório geral.")
+        print("[INFO] Nenhuma alteração para o relatório geral. Relatório não enviado.")
 
+# --- FUNÇÃO PRINCIPAL ---
 def main():
-    print("[INICIADO] Monitoramento de leads e matrículas...")
+    print("[INICIADO] Monitoramento de leads e matrículas.")
     
     # Carrega o estado salvo ou cria um novo
     estado_atual = carregar_estado()
     
-    # Flags de relatório diário (não precisam ser persistidos)
+    # Flags de relatório diário (são resetados todos os dias)
+    # Altere os horários aqui conforme sua necessidade
     relatorio_enviado_hoje = {
         "11:00": False,
-        "23:35": False
+        "23:43": False
     }
 
     while True:
-        now = datetime.now()
-        hora_atual_str = now.strftime("%H:%M")
-
-        # Processa cada influenciador com base no estado carregado/atualizado
-        for name, webhook in WEBHOOKS.items():
-            if webhook:
-                # Passamos o dicionário 'estado_atual' que será modificado pelas funções
+        try:
+            # Processa cada influenciador com base no estado carregado/atualizado
+            for name, webhook in WEBHOOKS.items():
                 process_influencer(name, webhook, estado_atual)
 
-        # Verifica a necessidade de enviar relatórios gerais
-        for hora_relatorio in relatorio_enviado_hoje:
-            if hora_atual_str == hora_relatorio and not relatorio_enviado_hoje[hora_relatorio]:
-                enviar_relatorio_geral(estado_atual)
-                relatorio_enviado_hoje[hora_relatorio] = True
+            # --- BLOCO DE AGENDAMENTO ROBUSTO ---
+            now = datetime.now()
 
-        # Reseta os flags do relatório diário à meia-noite
-        if hora_atual_str == "00:00":
-            for hora in relatorio_enviado_hoje:
-                relatorio_enviado_hoje[hora] = False
-            print("[INFO] Flags de relatório diário resetadas para um novo dia.")
+            for hora_agendada_str, foi_enviado in relatorio_enviado_hoje.items():
+                # Converte a string da hora agendada (ex: "11:00") para um objeto time
+                hora_agendada_obj = datetime.strptime(hora_agendada_str, "%H:%M").time()
 
-        time.sleep(CHECK_INTERVAL)
+                # Compara se a hora atual já passou da agendada E se ainda não foi enviada hoje
+                if now.time() >= hora_agendada_obj and not foi_enviado:
+                    print(f"[INFO] Hora atual ({now.strftime('%H:%M')}) passou da agendada ({hora_agendada_str}). Verificando para enviar relatório...")
+                    enviar_relatorio_geral(estado_atual)
+                    # Marca como enviado para não repetir no mesmo dia
+                    relatorio_enviado_hoje[hora_agendada_str] = True
+            
+            # Reseta os flags do relatório diário à meia-noite
+            if now.strftime("%H:%M") == "00:00" and any(relatorio_enviado_hoje.values()):
+                for hora in relatorio_enviado_hoje:
+                    relatorio_enviado_hoje[hora] = False
+                print("[INFO] Novo dia! Flags de relatório diário foram resetadas.")
+
+            # Aguarda para o próximo ciclo
+            time.sleep(CHECK_INTERVAL)
+
+        except KeyboardInterrupt:
+            print("\n[INFO] Script interrompido pelo usuário. Encerrando.")
+            break
+        except Exception as e:
+            print(f"[ERRO FATAL NO LOOP PRINCIPAL] Ocorreu um erro inesperado: {e}")
+            print("[INFO] Aguardando 60 segundos antes de tentar novamente...")
+            time.sleep(60)
 
 if __name__ == "__main__":
     main()
